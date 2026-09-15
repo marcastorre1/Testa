@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>NOVA — Wear the future</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#050508">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="NOVA">
+<link rel="apple-touch-icon" href="android-chrome-512x512.png">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#050508;color:#fff;font-family:-apple-system,Arial,sans-serif;overflow-x:hidden;padding-top:env(safe-area-inset-top)}
+button{cursor:pointer;font-family:inherit}
+a{text-decoration:none;color:inherit}
+canvas#particles{position:fixed;top:0;left:0;width:100%;height:100%;z-index:1;pointer-events:none;opacity:.6}
+nav{position:fixed;top:0;left:0;right:0;height:70px;padding:0 6%;display:flex;align-items:center;justify-content:space-between;z-index:100;background:rgba(5,5,8,.6);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.06)}
+.logo{font-size:24px;font-weight:900;letter-spacing:4px;background:linear-gradient(135deg,#a855f7,#3b82f6);-webkit-background-clip:text;background-clip:text;color:transparent}
+.nav-links{display:flex;gap:32px;font-size:13px;letter-spacing:1px;color:#888}
+.nav-links a:hover{color:#fff}
+.nav-cart{background:linear-gradient(135deg,#a855f7,#3b82f6);border:0;padding:11px 20px;border-radius:10px;color:#fff;font-weight:700;font-size:13px;letter-spacing:1px;box-shadow:0 0 20px rgba(168,85,247,.4);transition:.3s}
+.nav-cart:hover{transform:translateY(-2px);box-shadow:0 0 30px rgba(168,85,247,.6)}
+.hero{min-height:100vh;display:flex;align-items:center;padding:120px 6% 60px;position:relative;z-index:2}
+.hero-inner{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;width:100%;max-width:1400px;margin:0 auto}
+.hero-text small{color:#a855f7;letter-spacing:4px;font-size:12px;font-weight:700;display:block;margin-bottom:20px}
+.hero-text h1{font-size:clamp(52px,7vw,110px);line-height:.9;letter-spacing:-5px;font-weight:900;margin-bottom:25px}
+.hero-text h1 .grad{background:linear-gradient(135deg,#a855f7,#3b82f6,#06b6d4);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero-text p{color:#888;max-width:440px;line-height:1.7;font-size:15px;margin-bottom:35px}
+.btn-main{background:linear-gradient(135deg,#a855f7,#3b82f6);border:0;padding:16px 32px;border-radius:12px;color:#fff;font-weight:700;font-size:14px;letter-spacing:1px;box-shadow:0 10px 40px rgba(168,85,247,.4);transition:.3s}
+.btn-main:hover{transform:translateY(-3px);box-shadow:0 15px 50px rgba(168,85,247,.6)}
+.btn-ghost{background:transparent;border:1px solid rgba(255,255,255,.15);padding:16px 32px;border-radius:12px;color:#fff;font-weight:700;font-size:14px;letter-spacing:1px;margin-left:12px;transition:.3s}
+.btn-ghost:hover{border-color:#a855f7;background:rgba(168,85,247,.1)}
+.cube-scene{display:grid;place-items:center;perspective:1200px;height:500px;position:relative}
+.cube-scene:before{content:"";position:absolute;width:100%;height:100%;background:radial-gradient(circle,rgba(168,85,247,.25),transparent 60%);filter:blur(80px);animation:auraPulse 5s ease-in-out infinite}
+.cube{width:220px;height:220px;position:relative;transform-style:preserve-3d;animation:spinCube 16s linear infinite;cursor:grab}
+.cube:active{cursor:grabbing}
+.cube .face{position:absolute;width:220px;height:220px;display:grid;place-items:center;background:rgba(10,10,20,.85);border:2px solid rgba(168,85,247,.6);backdrop-filter:blur(10px);box-shadow:inset 0 0 60px rgba(168,85,247,.3),0 0 40px rgba(168,85,247,.5),0 0 80px rgba(59,130,246,.3);overflow:hidden}
+.cube .face:before{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(168,85,247,.15),transparent 50%,rgba(59,130,246,.15));pointer-events:none}
+.cube .face span{font-size:72px;font-weight:900;letter-spacing:6px;background:linear-gradient(135deg,#a855f7,#3b82f6,#06b6d4);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 0 30px rgba(168,85,247,.6);z-index:1}
+.face.front{transform:translateZ(110px)}
+.face.back{transform:rotateY(180deg) translateZ(110px)}
+.face.right{transform:rotateY(90deg) translateZ(110px)}
+.face.left{transform:rotateY(-90deg) translateZ(110px)}
+.face.top{transform:rotateX(90deg) translateZ(110px)}
+.face.bottom{transform:rotateX(-90deg) translateZ(110px)}
+.cube-shadow{position:absolute;bottom:50px;width:220px;height:50px;background:radial-gradient(ellipse,rgba(168,85,247,.5),transparent 70%);filter:blur(25px);animation:shadowPulse 16s linear infinite}
+@keyframes spinCube{0%{transform:rotateX(-15deg) rotateY(0)}100%{transform:rotateX(-15deg) rotateY(360deg)}}
+@keyframes shadowPulse{0%,100%{opacity:.6;transform:scale(1)}50%{opacity:.35;transform:scale(.85)}}
+@keyframes auraPulse{0%,100%{opacity:.7;transform:scale(1)}50%{opacity:1;transform:scale(1.1)}}
+.reveal{opacity:0;transform:translateY(60px);transition:all 1s cubic-bezier(.22,1,.36,1)}
+.reveal.show{opacity:1;transform:translateY(0)}
+.shop{padding:100px 6%;position:relative;z-index:2}
+.shop-head{text-align:center;margin-bottom:60px}
+.shop-head small{color:#a855f7;letter-spacing:5px;font-size:12px;font-weight:700}
+.shop-head h2{font-size:clamp(44px,6vw,80px);font-weight:900;letter-spacing:-3px;margin-top:15px}
+.shop-head h2 span{background:linear-gradient(135deg,#a855f7,#3b82f6);-webkit-background-clip:text;background-clip:text;color:transparent}
+.products{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px;max-width:1400px;margin:0 auto}
+.card{background:linear-gradient(135deg,rgba(20,20,30,.9),rgba(10,10,20,.9));border:1px solid rgba(255,255,255,.08);border-radius:20px;overflow:hidden;transition:.4s cubic-bezier(.22,1,.36,1);transform-style:preserve-3d;position:relative}
+.card:before{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(168,85,247,.15),transparent 50%);opacity:0;transition:.4s;pointer-events:none}
+.card:hover:before{opacity:1}
+.card:hover{border-color:rgba(168,85,247,.5);box-shadow:0 30px 60px rgba(168,85,247,.25),0 0 40px rgba(59,130,246,.15)}
+.card-img{height:280px;background:radial-gradient(circle at 50% 30%,rgba(168,85,247,.15),transparent 70%),#0a0a12;display:grid;place-items:center;position:relative;overflow:hidden}
+.card-img:before{content:"";position:absolute;width:140px;height:200px;background:linear-gradient(135deg,#3a3a4a,#1a1a2a);border-radius:16px;box-shadow:0 0 40px rgba(168,85,247,.3)}
+.card-img:after{content:"👕";position:absolute;font-size:80px;opacity:.3}
+.card-body{padding:22px;transform:translateZ(30px)}
+.card-body h3{font-size:16px;font-weight:800;letter-spacing:1px;margin-bottom:6px}
+.card-body small{color:#666;font-size:11px;letter-spacing:2px;display:block;margin-bottom:18px}
+.card-foot{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.card-price{font-size:20px;font-weight:900;background:linear-gradient(135deg,#a855f7,#3b82f6);-webkit-background-clip:text;background-clip:text;color:transparent}
+.card-btn{background:linear-gradient(135deg,#a855f7,#3b82f6);border:0;padding:10px 18px;border-radius:10px;color:#fff;font-weight:700;font-size:12px;letter-spacing:1px;transition:.3s}
+.card-btn:hover{transform:scale(1.05);box-shadow:0 0 25px rgba(168,85,247,.6)}
+footer{padding:80px 6% 40px;text-align:center;border-top:1px solid rgba(255,255,255,.06);position:relative;z-index:2}
+footer .logo{font-size:32px;margin-bottom:20px}
+footer p{color:#555;font-size:13px;line-height:1.8}
+footer .socials{display:flex;gap:16px;justify-content:center;margin:25px 0}
+footer .socials a{width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);display:grid;place-items:center;transition:.3s;font-size:18px}
+footer .socials a:hover{background:linear-gradient(135deg,#a855f7,#3b82f6);border-color:transparent;transform:translateY(-3px)}
+@media(max-width:900px){
+.hero-inner{grid-template-columns:1fr;gap:30px;text-align:center}
+.hero-text p{margin-left:auto;margin-right:auto}
+.cube-scene{height:340px;order:-1}
+.cube,.cube .face{width:160px;height:160px}
+.face.front{transform:translateZ(80px)}
+.face.back{transform:rotateY(180deg) translateZ(80px)}
+.face.right{transform:rotateY(90deg) translateZ(80px)}
+.face.left{transform:rotateY(-90deg) translateZ(80px)}
+.face.top{transform:rotateX(90deg) translateZ(80px)}
+.face.bottom{transform:rotateX(-90deg) translateZ(80px)}
+.cube .face span{font-size:48px}
+.nav-links{display:none}
+.hero-text h1{letter-spacing:-3px}
+.btn-ghost{margin:12px 0 0 0;display:block}
+}
+</style>
+</head>
+<body>
+<canvas id="particles"></canvas>
+<nav>
+<div class="logo">NOVA</div>
+<div class="nav-links">
+<a href="#shop">КАТАЛОГ</a>
+<a href="#">О НАС</a>
+<a href="#">КОНТАКТЫ</a>
+</div>
+<button class="nav-cart">🛒 КОРЗИНА</button>
+</nav>
+<section class="hero">
+<div class="hero-inner">
+<div class="hero-text">
+<small>NOVA / 2026</small>
+<h1>WEAR<br><span class="grad">THE</span><br>FUTURE.</h1>
+<p>Минимализм будущего. Каждая вещь — как заявление. Создано для тех, кто идёт впереди.</p>
+<button class="btn-main" onclick="document.getElementById('shop').scrollIntoView({behavior:'smooth'})">СМОТРЕТЬ КОЛЛЕКЦИЮ</button>
+<button class="btn-ghost">О БРЕНДЕ</button>
+</div>
+<div class="cube-scene">
+<div class="cube" id="cube3d">
+<div class="face front"><span>NV</span></div>
+<div class="face back"><span>NV</span></div>
+<div class="face right"><span>NV</span></div>
+<div class="face left"><span>NV</span></div>
+<div class="face top"><span>NV</span></div>
+<div class="face bottom"><span>NV</span></div>
+</div>
+<div class="cube-shadow"></div>
+</div>
+</div>
+  </section>
+  <section class="shop" id="shop">
+<div class="shop-head reveal">
+<small>COLLECTION</small>
+<h2>THE <span>DROP.</span></h2>
+</div>
+<div class="products">
+<div class="card reveal" data-tilt>
+<div class="card-img"></div>
+<div class="card-body">
+<h3>NOVA CORE TEE</h3>
+<small>NOVA / 001</small>
+<div class="card-foot">
+<div class="card-price">45 €</div>
+<button class="card-btn">В КОРЗИНУ</button>
+</div>
+</div>
+</div>
+<div class="card reveal" data-tilt>
+<div class="card-img"></div>
+<div class="card-body">
+<h3>NOVA HOODIE X</h3>
+<small>NOVA / 002</small>
+<div class="card-foot">
+<div class="card-price">89 €</div>
+<button class="card-btn">В КОРЗИНУ</button>
+</div>
+</div>
+</div>
+<div class="card reveal" data-tilt>
+<div class="card-img"></div>
+<div class="card-body">
+<h3>NOVA STREET JACKET</h3>
+<small>NOVA / 003</small>
+<div class="card-foot">
+<div class="card-price">129 €</div>
+<button class="card-btn">В КОРЗИНУ</button>
+</div>
+</div>
+</div>
+<div class="card reveal" data-tilt>
+<div class="card-img"></div>
+<div class="card-body">
+<h3>LIMITED DROP 001</h3>
+<small>NOVA / LIMITED</small>
+<div class="card-foot">
+<div class="card-price">— €</div>
+<button class="card-btn">В КОРЗИНУ</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<footer>
+<div class="logo">NOVA</div>
+<p>Минимализм будущего. Ограниченные коллекции.<br>© 2026 NOVA. Все права защищены.</p>
+<div class="socials">
+<a href="#">📷</a>
+<a href="#">✈️</a>
+<a href="#">🎵</a>
+<a href="#">▶️</a>
+</div>
+</footer>
+<script>
+(function(){
+  const canvas=document.getElementById('particles');
+  const ctx=canvas.getContext('2d');
+  let w,h,particles=[];
+  function resize(){w=canvas.width=innerWidth;h=canvas.height=innerHeight;}
+  resize();
+  addEventListener('resize',resize);
+  for(let i=0;i<80;i++){
+    particles.push({x:Math.random()*w,y:Math.random()*h,r:Math.random()*1.8+0.4,vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3,hue:Math.random()*60+240});
+  }
+  function draw(){
+    ctx.clearRect(0,0,w,h);
+    particles.forEach(p=>{
+      p.x+=p.vx;p.y+=p.vy;
+      if(p.x<0||p.x>w)p.vx*=-1;
+      if(p.y<0||p.y>h)p.vy*=-1;
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle=`hsla(${p.hue},80%,70%,.6)`;
+      ctx.shadowColor=`hsla(${p.hue},80%,60%,.9)`;
+      ctx.shadowBlur=8;
+      ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+(function(){
+  const cube=document.getElementById('cube3d');
+  if(!cube)return;
+  let drag=false,sx=0,sy=0,rx=-15,ry=0,tId=null;
+  function apply(){cube.style.animation='none';cube.style.transform=`rotateX(${rx}deg) rotateY(${ry}deg)`;}
+  function start(x,y){drag=true;sx=x;sy=y;}
+  function move(x,y){if(!drag)return;ry+=(x-sx)*.5;rx-=(y-sy)*.5;sx=x;sy=y;apply();}
+  function end(){if(!drag)return;drag=false;clearTimeout(tId);tId=setTimeout(()=>{cube.style.animation='spinCube 16s linear infinite';},2000);}
+  cube.addEventListener('mousedown',e=>start(e.clientX,e.clientY));
+  window.addEventListener('mousemove',e=>move(e.clientX,e.clientY));
+  window.addEventListener('mouseup',end);
+  cube.addEventListener('touchstart',e=>start(e.touches[0].clientX,e.touches[0].clientY),{passive:true});
+  window.addEventListener('touchmove',e=>move(e.touches[0].clientX,e.touches[0].clientY),{passive:true});
+  window.addEventListener('touchend',end);
+})();
+
+(function(){
+  const els=document.querySelectorAll('.reveal');
+  const io=new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        e.target.classList.add('show');
+        io.unobserve(e.target);
+      }
+    });
+  },{threshold:.15});
+  els.forEach(el=>io.observe(el));
+})();
+
+(function(){
+  const cards=document.querySelectorAll('[data-tilt]');
+  cards.forEach(card=>{
+    card.addEventListener('mousemove',e=>{
+      const r=card.getBoundingClientRect();
+      const x=(e.clientX-r.left)/r.width-.5;
+      const y=(e.clientY-r.top)/r.height-.5;
+      card.style.transform=`perspective(900px) rotateY(${x*12}deg) rotateX(${-y*12}deg) translateY(-6px) scale(1.02)`;
+    });
+    card.addEventListener('mouseleave',()=>{card.style.transform='';});
+    card.addEventListener('touchmove',e=>{
+      const t=e.touches[0];
+      const r=card.getBoundingClientRect();
+      const x=(t.clientX-r.left)/r.width-.5;
+      const y=(t.clientY-r.top)/r.height-.5;
+      card.style.transform=`perspective(900px) rotateY(${x*10}deg) rotateX(${-y*10}deg)`;
+    },{passive:true});
+    card.addEventListener('touchend',()=>{card.style.transform='';});
+  });
+})();
+
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click',e=>{
+    const id=a.getAttribute('href');
+    if(id.length>1){
+      e.preventDefault();
+      document.querySelector(id)?.scrollIntoView({behavior:'smooth'});
+    }
+  });
+});
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('service-worker.js')
+      .then(() => console.log('✅ PWA работает'))
+      .catch(err => console.log('Ошибка PWA:', err));
+  });
+}
+</script>
+</body>
+</html>
